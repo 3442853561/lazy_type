@@ -1,61 +1,11 @@
-use alloc::raw_vec::RawVec;
-
-use std::fmt;
-use std::ptr;
+use std::fmt::{Debug, Formatter, Result};
 use std::ops::{Index, IndexMut};
-
-struct _Array<T: Clone> {
-    buf: RawVec<T>,
-    len: usize,
-}
-
-impl<T: Clone> _Array<T> {
-    fn new(value: T, size: usize) -> Self {
-        let mut result: _Array<T> = _Array {
-            buf: RawVec::new(),
-            len: 0,
-        };
-        result.buf.reserve(0, size);
-        for x in vec![value; size] {
-            unsafe {
-                ptr::write(result.buf.ptr().offset(result.len as isize), x.clone());
-            }
-            result.len += 1;
-        }
-        result
-    }
-
-    fn get(self) -> (Box<[T]>, Self) {
-        let slice = unsafe { self.buf.into_box() };
-        let mut reduzate: _Array<T> = _Array {
-            buf: RawVec::new(),
-            len: 0,
-        };
-        reduzate.set(&*slice.clone());
-        (slice, reduzate)
-    }
-
-    fn set(&mut self, elems: &[T]) {
-        self.buf.reserve(0, elems.len());
-        for x in elems {
-            unsafe {
-                ptr::write(self.buf.ptr().offset(self.len as isize), x.clone());
-            }
-            self.len += 1;
-        }
-    }
-
-    fn boxed(self) -> Array<T> {
-        let (slice, _) = self.get();
-        Array(slice)
-    }
-}
 
 pub struct Array<T: Clone>(Box<[T]>);
 
 impl<T: Clone> Array<T> {
     pub fn new(value: T, size: usize) -> Self {
-        _Array::new(value, size).boxed()
+        Array(Box::from(vec![value; size]))
     }
     
     pub fn len(&self) -> usize {
@@ -76,8 +26,8 @@ impl<T: Clone> IndexMut<usize> for Array<T> {
     }
 }
 
-impl<T: Clone + fmt::Debug> fmt::Debug for Array<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl<T: Clone + Debug> Debug for Array<T> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         write!(f, "{:?}", self.0)
     }
 }
