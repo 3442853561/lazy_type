@@ -3,6 +3,8 @@ name = "lazy_type"
 version = "0.1.0"
 authors = ["3442853561 <3442853561@qq.com>"]
 license = "MIT"
+description = "A series of extension types"
+keywords = ["type"]
 
 [lib]
 name = "lazy_type"
